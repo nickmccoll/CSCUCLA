@@ -15,23 +15,23 @@ public:
   Analyze(std::string cscFileName, std::string gemFileName,const GEMConfigInfo* info) : AnalyzeBoth(cscFileName,gemFileName,info)
   {
 
-    plotter.book2D("noisemap_denom",";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNRows(), -0.5, geo.getNRows() -.5);
-    plotter.book2D("noisemap_num"  ,";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNRows(), -0.5, geo.getNRows() -.5);
+    plotter.book2D("noisemap_denom",";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
+    plotter.book2D("noisemap_num"  ,";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
 
-    for(unsigned int iR = 0;iR <geo.getNRows(); ++iR ){
+    for(unsigned int iR = 0;iR <geo.getNPartitions(); ++iR ){
       TString name = TString::Format("noiseClusterCount_eta_%u",iR);
       plotter.book1D(name  ,";# of noise clusters per event;a.u."  ,15,-0.5,14.5);
     }
 
 
-    plotter.book2D("effmap_denom",";vFat column;#eta partition"  ,3, -0.5, 2.5,geo.getNRows(), -0.5, geo.getNRows() -.5);
-    plotter.book2D("effmap_num"  ,";vFat column;#eta partition"  ,3, -0.5, 2.5,geo.getNRows(), -0.5, geo.getNRows() -.5);
+    plotter.book2D("effmap_denom",";vFat column;#eta partition"  ,3, -0.5, 2.5,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
+    plotter.book2D("effmap_num"  ,";vFat column;#eta partition"  ,3, -0.5, 2.5,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
 
 
-    plotter.book1D("effmap_denom_int",";#eta partition"  ,geo.getNRows(), -0.5, geo.getNRows() -.5);
-    plotter.book1D("effmap_num_int"  ,";#eta partition"  ,geo.getNRows(), -0.5, geo.getNRows() -.5);
+    plotter.book1D("effmap_denom_int",";#eta partition"  ,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
+    plotter.book1D("effmap_num_int"  ,";#eta partition"  ,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
 
-    plotter.book2D("occmap"  ,";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNRows(), -0.5, geo.getNRows() -.5);
+    plotter.book2D("occmap"  ,";strip number;#eta partition"  ,geo.getNStrips(), -0.5, geo.getNStrips() -0.5,geo.getNPartitions(), -0.5, geo.getNPartitions() -.5);
 
      }
   virtual  ~Analyze() {};
@@ -166,12 +166,12 @@ public:
       return strip;
     };
 
-    std::vector<int> noiseCounts(geo.getNRows(),-1);
+    std::vector<int> noiseCounts(geo.getNPartitions(),-1);
 
     int hitRow  = geo.findEtaPartition(cscSeg.y());
     int plotHitRow = translateRowto0isNarrowFrom0isWide(hitRow);
     //fill in empties
-    for(int iR = 0; iR < geo.getNRows(); ++iR ){
+    for(int iR = 0; iR < geo.getNPartitions(); ++iR ){
       if(TMath::Abs(iR - plotHitRow) <= 1  ) continue;
       noiseCounts[iR]++;
       for(int iStrip = 0; iStrip < geo.getNStrips(); ++iStrip){
@@ -189,7 +189,7 @@ public:
       }
     }
 
-    for(unsigned int iR = 0;iR <geo.getNRows(); ++iR ){
+    for(unsigned int iR = 0;iR <geo.getNPartitions(); ++iR ){
       if(noiseCounts[iR] < 0) continue;
       TString name = TString::Format("noiseClusterCount_eta_%u",iR);
       plotter.get1D(name)->Fill(noiseCounts[iR]);

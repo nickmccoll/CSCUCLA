@@ -4,60 +4,71 @@
 #include <TString.h>
 namespace CSCGEMTuples {
 
-Point2D GEMGeometry::getClusterPosition(int rowNumber,int firstStrip, int nStrips) const {
-  return partitions[rowNumber].clusterPosition(firstStrip,nStrips) + partionCenters[rowNumber];
+void GEMGeometry::getVFATIEtaIPhi(int vFATChannelNumber, int & iEta, int & iPhi ) const  {
+  iPhi = vFATChannelNumber/nPartitions +1;
+  iEta = nPartitions - (vFATChannelNumber % nPartitions);
 }
-Error2D GEMGeometry::getClusterError(int rowNumber,int firstStrip, int nStrips) const {
-  return partitions[rowNumber].clusterError(firstStrip,nStrips);
+
+int GEMGeometry::geVFATChannelNumber(int iEta, int iPhi) const{
+  return nPartitions*(iPhi - 1) + nPartitions - iEta;
 }
-ErrorPoint2D GEMGeometry::getClusterInfo(int rowNumber,int firstStrip, int nStrips) const {
-  return ErrorPoint2D( partitions[rowNumber].clusterPosition(firstStrip,nStrips) + partionCenters[rowNumber],
-                       partitions[rowNumber].clusterError(firstStrip,nStrips)
+unsigned int GEMGeometry::getPartitionStripNumber(int iPhi, int vFatStripNumber) const {
+  return vFatStripNumber + 1 + getNStripsPerVFAT()*(nPhis-iPhi);
+}
+Point2D GEMGeometry::getClusterPosition(int iEta,int firstStrip, int nStrips) const {
+  return getPartition(iEta).clusterPosition(firstStrip,nStrips) + getPartitionCenter(iEta);
+}
+Error2D GEMGeometry::getClusterError(int iEta,int firstStrip, int nStrips) const {
+  return getPartition(iEta).clusterError(firstStrip,nStrips);
+}
+ErrorPoint2D GEMGeometry::getClusterInfo(int iEta,int firstStrip, int nStrips) const {
+  return ErrorPoint2D( getPartition(iEta).clusterPosition(firstStrip,nStrips) + getPartitionCenter(iEta),
+      getPartition(iEta).clusterError(firstStrip,nStrips)
   );
 
 }
 
-Point2D GEMGeometry::getStripCenter(int rowNumber, int stripCenter) const {
-  return partitions[rowNumber].centerOfStrip(stripCenter) +   partionCenters[rowNumber];
+Point2D GEMGeometry::getStripCenter(int iEta, int stripCenter) const {
+  return getPartition(iEta).centerOfStrip(stripCenter) +   getPartitionCenter(iEta);
 }
 
-float GEMGeometry::getStripAngle(int rowNumber, float strip) const {
-  return partitions[rowNumber].stripAngle(strip);
+float GEMGeometry::getStripAngle(int iEta, float strip) const {
+  return getPartition(iEta).stripAngle(strip);
 }
-float GEMGeometry::getRowHeight(int rowNumber) const {
-  return partitions[rowNumber].height();
+float GEMGeometry::getPartitionHeight(int iEta) const {
+  return getPartition(iEta).height();
 }
-float GEMGeometry::getRowTop(int rowNumber) const {
-  return partionCenters[rowNumber].y() + partitions[rowNumber].height()/2;
+float GEMGeometry::getPartitionTop(int iEta) const {
+  return getPartitionCenter(iEta).y() + getPartition(iEta).height()/2;
 }
-float GEMGeometry::getRowBottom(int rowNumber) const {
-  return partionCenters[rowNumber].y() - partitions[rowNumber].height()/2;
+float GEMGeometry::getPartitionBottom(int iEta) const {
+  return getPartitionCenter(iEta).y() - getPartition(iEta).height()/2;
 }
-float GEMGeometry::getRowBottomEdge(int rowNumber) const {
-  return partitions[rowNumber].bottomEdgeSize();
+float GEMGeometry::getPartitionBottomEdge(int iEta) const {
+  return getPartition(iEta).bottomEdgeSize();
 }
-float GEMGeometry::getRowTopEdge(int rowNumber) const {
-  return partitions[rowNumber].topEdgeSize();
+float GEMGeometry::getPartitionTopEdge(int iEta) const {
+  return getPartition(iEta).topEdgeSize();
 }
 
 int GEMGeometry::findEtaPartition(float yValue) const {
-  if(yValue >=  getRowTop(0) ) return -1;
-  for(unsigned int iR = 0; iR < getNRows(); ++iR){
-    if(yValue >=  getRowBottom(iR) ) return iR;
+  if(yValue >=  getPartitionTop(1) ) return 0;
+  for(unsigned int iR = 1; iR <= getNPartitions(); ++iR){
+    if(yValue >=  getPartitionBottom(iR) ) return iR;
   }
-  return getNRows();
+  return getNPartitions() + 1;
 }
 
 
-void GEMGeometry::build() {
+void GEMGeometry::build(float gemXScale) {
   //Hard code paramters because generality is not needed!
-  const int nLay = 8;
+  nPartitions = 8;
   distBtwPartitions = 0.05;
-  nColumns = 3;
+  nPhis = 3;
   nStrips = 384;
-  std::vector<float> botEdge(nLay);
-  std::vector<float> topEdge(nLay);
-  std::vector<float> height(nLay);
+  std::vector<float> botEdge(nPartitions);
+  std::vector<float> topEdge(nPartitions);
+  std::vector<float> height(nPartitions);
 
   //Numbering in CMSSW goes from wide to narrow
   botEdge[0] = 20.5701; topEdge[0] = 22.2929; height[0] = 9.7025;
@@ -98,22 +109,21 @@ void GEMGeometry::build() {
 //  botEdge[5] = 12.5676; topEdge[5] = 13.5714; height[5] = 6.728 ;
 //  botEdge[6] = 11.5593; topEdge[6] = 12.5631; height[6] = 5.6535;
 //  botEdge[7] = 11.5593; topEdge[7] = 12.5631; height[7] = 5.6535;
+  if(gemXScale > 0)
+  for(unsigned int iE = 0; iE < nPartitions; ++iE){
+    topEdge[iE] *= gemXScale;
+    botEdge[iE] *= gemXScale;
+  }
 
-//  double alpha = .925;
-//  for(unsigned int iE = 0; iE < 8; ++iE){
-//    topEdge[iE] = topEdge[iE] - (1 - alpha)*botEdge[iE];
-//    botEdge[iE] *= alpha;
-//  }
-
-  for(unsigned int iL = 0; iL < nLay; ++iL){
+  for(unsigned int iL = 0; iL < nPartitions; ++iL){
     partitions.emplace_back(botEdge[iL],topEdge[iL],height[iL],nStrips);
   }
 
   float totalHeight = 0;
-  partionCenters.resize(nLay);
+  partitionCenters.resize(nPartitions);
   //First build it bottom up!
-  for(int iL = nLay -1; iL >= 0; --iL){
-    partionCenters[iL].set(0,totalHeight + height[iL]);
+  for(int iL = nPartitions -1; iL >= 0; --iL){
+    partitionCenters[iL].set(0,totalHeight + height[iL]);
     totalHeight += height[iL]*2;
     if(iL) totalHeight += distBtwPartitions;
   }
@@ -126,8 +136,8 @@ void GEMGeometry::build() {
 
   //Now adjust it so that it is centered at 0
   Point2D displacement(0.,totalHeight/2);
-  for(unsigned int iL = 0; iL < nLay; ++iL){
-    partionCenters[iL] -= displacement;
+  for(unsigned int iL = 0; iL < nPartitions; ++iL){
+    partitionCenters[iL] -= displacement;
   }
 //  std::cout << std::endl;
   //Print in tabel as we want it!

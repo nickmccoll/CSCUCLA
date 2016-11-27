@@ -24,6 +24,24 @@ Segment::Segment(const Segment& inseg) : _coords(new double[4]), _cov(new double
 void Segment::setCoords(double x, double y, double dxdz, double dydz) {
   _coords[X] = x; _coords[Y]=y; _coords[DX] = dxdz; _coords[DY] = dydz;
 }
+Segment& Segment::operator= (const Segment& inseg) {
+  _coords[X]  = inseg.coords()[X]  ;
+  _coords[Y]  = inseg.coords()[Y]  ;
+  _coords[DX] = inseg.coords()[DX] ;
+  _coords[DY] = inseg.coords()[DY] ;
+
+  _cov[XX]     = inseg.cov()[XX]   ;
+  _cov[XY]     = inseg.cov()[XY]   ;
+  _cov[XDX]    = inseg.cov()[XDX]  ;
+  _cov[XDY]    = inseg.cov()[XDY]  ;
+  _cov[YY]     = inseg.cov()[YY]   ;
+  _cov[YDX]    = inseg.cov()[YDX]  ;
+  _cov[YDY]    = inseg.cov()[YDY]  ;
+  _cov[DXDX]   = inseg.cov()[DXDX] ;
+  _cov[DXDY]   = inseg.cov()[DXDY] ;
+  _cov[DYDY]   = inseg.cov()[DYDY] ;
+  return *this;
+}
 void Segment::setCov(double xx, double xy, double xdxdz, double xdydz, double yy, double ydxdz, double ydydz, double dxdzdxdz, double dxdzdydz, double dydzdydz) {
 _cov[XX]   = xx;
 _cov[XY]   = xy;

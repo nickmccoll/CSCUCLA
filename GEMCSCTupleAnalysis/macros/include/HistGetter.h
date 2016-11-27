@@ -10,6 +10,60 @@
 namespace CSCGEMTuples {
 class HistGetter {
 public:
+
+ TH1 * getOrMake1D(const char *name, const char *title, Int_t nbinsx, Double_t xlow, Double_t xup) {
+   TH1 * h = get1D(name,false);
+   if(h) return h;
+   book1D( name, title, nbinsx, xlow, xup);
+   return hists.back();
+ }
+ TH1 * getOrMake1D(const char *name, const char *title, Int_t nbinsx, const Float_t *xbins) {
+   TH1 * h = get1D(name,false);
+   if(h) return h;
+   book1D( name, title, nbinsx, xbins);
+   return hists.back();
+ }
+ TH1 * getOrMake1D(const char *name, const char *title, Int_t nbinsx, const Double_t *xbins) {
+   TH1 * h = get1D(name,false);
+   if(h) return h;
+   book1D( name, title, nbinsx, xbins);
+   return hists.back();
+ }
+
+ TH2 * getOrMake2D(const char *name, const char *title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup){
+   TH2 * h = get2D(name,false);
+   if(h) return h;
+   book2D( name, title, nbinsx, xlow,xup,nbinsy,ylow,yup);
+   return hist2Ds.back();
+ }
+ TH2 * getOrMake2D(const char *name, const char *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, Double_t ylow, Double_t yup){
+   TH2 * h = get2D(name,false);
+   if(h) return h;
+   book2D( name, title, nbinsx, xbins, nbinsy,ylow,yup);
+   return hist2Ds.back();
+ }
+ TH2 * getOrMake2D(const char *name, const char *title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, const Double_t *ybins){
+   TH2 * h = get2D(name,false);
+   if(h) return h;
+   book2D( name, title, nbinsx, xlow,xup,nbinsy,ybins);
+   return hist2Ds.back();
+ }
+ TH2 * getOrMake2D(const char *name, const char *title, Int_t nbinsx, const Double_t *xbins, Int_t nbinsy, const Double_t *ybins){
+   TH2 * h = get2D(name,false);
+   if(h) return h;
+   book2D( name, title, nbinsx, xbins,nbinsy,ybins);
+   return hist2Ds.back();
+ }
+ TH2 * getOrMake2D(const char *name, const char *title, Int_t nbinsx, const Float_t *xbins, Int_t nbinsy, const Float_t *ybins){
+   TH2 * h = get2D(name,false);
+   if(h) return h;
+   book2D( name, title, nbinsx, xbins,nbinsy,ybins);
+   return hist2Ds.back();
+ }
+
+
+
+
   void book1D(const char *name, const char *title, Int_t nbinsx, Double_t xlow, Double_t xup) {
     addHist(name);
     TH1 * h = new TH1F(name,title,nbinsx,xlow,xup);
@@ -60,14 +114,16 @@ public:
     hist2Ds.push_back( h );
   }
 
-  TH1 * get1D(const char *name) {
+  TH1 * get1D(const char *name, bool throwIfMissing = true) {
     auto it = histsMap.find(name);
     if (it != histsMap.end())  return hists[it->second];
+    if(!throwIfMissing) return 0;
     throw std::invalid_argument(TString::Format("You did not book a 1D histogram with name: %s",name));
   }
-  TH2 * get2D(const char *name) {
+  TH2 * get2D(const char *name, bool throwIfMissing = true) {
     auto it = hist2DsMap.find(name);
     if (it != hist2DsMap.end())  return hist2Ds[it->second];
+    if(!throwIfMissing) return 0;
     throw std::invalid_argument(TString::Format("You did not book a 2D histogram with name: %s",name));
   }
 

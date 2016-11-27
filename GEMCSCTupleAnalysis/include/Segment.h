@@ -9,6 +9,8 @@ public:
   Segment() : _coords(new double[4]), _cov(new double[10]) {};
   Segment(const Segment& inseg);
   ~Segment() {delete[] _coords; delete[] _cov;}
+  Segment& operator= (const Segment& inseg);
+
   void setCoords(double x, double y, double dxdz, double dydz);
   void setCov(double xx, double xy, double xdxdz, double xdydz, double yy, double ydxdz, double ydydz, double dxdzdxdz, double dxdzdydz, double dydzdydz);
 

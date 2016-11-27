@@ -7,7 +7,7 @@
 void GEMGeoPlotting::plotGEM(TPad * pad, int lineColor, int lineWidth) {
      CSCGEMTuples::GEMGeometry geo;
 
-     for(unsigned int iL = 0; iL < geo.getNRows(); ++iL){
+     for(unsigned int iL = 0; iL < geo.getNPartitions(); ++iL){
        const auto& part = geo.getPartition(iL);
        const auto cen = geo.getPartitionCenter(iL);
        double topY      =    cen.y() +   part.height()/2;

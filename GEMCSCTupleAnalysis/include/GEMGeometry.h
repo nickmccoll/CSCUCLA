@@ -7,28 +7,32 @@ namespace CSCGEMTuples {
 
 class GEMGeometry {
 public:
-  GEMGeometry() : distBtwPartitions(0), nColumns(0) { build();};
-  unsigned int getNRows() const {return partitions.size();}
-  unsigned int getNColumns() const {return nColumns;}
+  GEMGeometry() : distBtwPartitions(0), nPhis(0), nPartitions(0), nStrips(0) { build();};
+  GEMGeometry(float gemXScale) : distBtwPartitions(0), nPhis(0), nPartitions(0), nStrips(0)  { build(gemXScale);};
+  unsigned int getNPartitions() const {return nPartitions;}
+  unsigned int getNPhis() const {return nPhis;}
   unsigned int getNStrips() const {return nStrips;}
-  unsigned int getNStripsPerVFAT() const {return nStrips/nColumns;}
+  void getVFATIEtaIPhi(int vFATChannelNumber, int & iEta, int & iPhi ) const;
+  int geVFATChannelNumber(int iEta, int iPhi) const;
+  unsigned int getNStripsPerVFAT() const {return nStrips/nPhis;}
+  unsigned int getPartitionStripNumber(int iPhi, int vFatStripNumber) const; // go from 0-127 on each vfat to 1-384 for the entire eta partition
 
-  const GEMPartitionGeometry& getPartition(int rowNumber) const {return partitions[rowNumber];}
-  Point2D getPartitionCenter(int rowNumber) const {return partionCenters[rowNumber];}
+  const GEMPartitionGeometry& getPartition(int iEta) const {return partitions[iEta-1];}
+  const Point2D& getPartitionCenter(int iEta) const {return partitionCenters[iEta-1];}
 
-  Point2D getClusterPosition(int rowNumber,int firstStrip, int nStrips) const;
-  Error2D getClusterError(int rowNumber,int firstStrip, int nStrips) const;
-  ErrorPoint2D getClusterInfo(int rowNumber,int firstStrip, int nStrips) const;
+  Point2D getClusterPosition(int iEta,int firstStrip, int nStrips) const;
+  Error2D getClusterError(int iEta,int firstStrip, int nStrips) const;
+  ErrorPoint2D getClusterInfo(int iEta,int firstStrip, int nStrips) const;
 
   //General information
-  Point2D getStripCenter(int rowNumber, int stripNumber) const;
-  float getStripAngle(int rowNumber, float strip) const;
-  float getStripPitch(int rowNumber, float yHeight) const;
-  float getRowHeight(int rowNumber) const;
-  float getRowTop(int rowNumber) const;
-  float getRowBottom(int rowNumber) const;
-  float getRowBottomEdge(int rowNumber) const;
-  float getRowTopEdge(int rowNumber) const;
+  Point2D getStripCenter(int iEta, int stripNumber) const;
+  float getStripAngle(int iEta, float strip) const;
+  float getStripPitch(int iEta, float yHeight) const;
+  float getPartitionHeight(int iEta) const;
+  float getPartitionTop(int iEta) const;
+  float getPartitionBottom(int iEta) const;
+  float getPartitionBottomEdge(int iEta) const;
+  float getPartitionTopEdge(int iEta) const;
 
   //Finders
   //return eta partion local y belongs to
@@ -38,17 +42,22 @@ public:
   int findEtaPartition(float yValue) const;
 
 
+  //Numbering information
+
+
+
 
 
 
 
 
 private:
-  void build();
+  void build(float gemXScale = -1);
   std::vector<GEMPartitionGeometry> partitions;
-  std::vector<Point2D> partionCenters;
+  std::vector<Point2D> partitionCenters;
   float distBtwPartitions;
-  unsigned int nColumns;
+  unsigned int nPhis;
+  unsigned int nPartitions;
   unsigned int nStrips;
 };
 

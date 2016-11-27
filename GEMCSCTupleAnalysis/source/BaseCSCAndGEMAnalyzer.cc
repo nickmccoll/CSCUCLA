@@ -17,10 +17,20 @@ namespace CSCGEMTuples {
         while(nextEvent(reportFrequency)){runAEvent();eventNumber++;}
     }
 
+    void AnalyzeCSC::buildSegments() {
+      segments.clear();
+      segments.resize(segmentInfo.segment_cov_x->size());
+      for(unsigned int iS = 0; iS < segments.size(); ++iS){
+        segments[iS].setCoords(segmentInfo.segment_pos_x->at(iS),segmentInfo.segment_pos_y->at(iS),segmentInfo.segment_dxdz->at(iS),segmentInfo.segment_dydz->at(iS));
+        segments[iS].setCov(segmentInfo.segment_cov_x->at(iS),segmentInfo.segment_cov_x_y->at(iS),segmentInfo.segment_cov_dxdz_x->at(iS),segmentInfo.segment_cov_dydz_x->at(iS),
+            segmentInfo.segment_cov_y->at(iS),segmentInfo.segment_cov_dxdz_y->at(iS),segmentInfo.segment_cov_dydz_y->at(iS),
+            segmentInfo.segment_cov_dxdz->at(iS),segmentInfo.segment_cov_dxdz_dydz->at(iS),segmentInfo.segment_cov_dydz->at(iS));
+      }
+    }
+
     AnalyzeGEM::AnalyzeGEM(std::string fileName, std::string treeName,const GEMConfigInfo * gemInfo)
         : BaseTupleAnalyzer(fileName,treeName),
-        gemInfo(*gemInfo),
-        gemGeo(gemInfo->dataDir+gemInfo->geoName){
+        gemInfo(*gemInfo){
             event = new Event();
             setBranchAddress("GEMEvents",&event,true);
         }
@@ -30,26 +40,11 @@ namespace CSCGEMTuples {
 
     AnalyzeBoth::AnalyzeBoth(std::string cscFile, std::string gemFile,const GEMConfigInfo* gemInfo) :
         csc(cscFile,"CSCDigiTree"),
-        gem(gemFile,"GEMtree", gemInfo)
-    {}
-
-    void AnalyzeCSC::projSement(int segIDX, double projZ, double& projx, double& projy,double& projxe, double& projye) const {
-
-        const double s_x          = segmentInfo.segment_pos_x     ->at(segIDX);
-        const double s_y          = segmentInfo.segment_pos_y     ->at(segIDX);
-        const double s_dxdz       = segmentInfo.segment_dxdz      ->at(segIDX);
-        const double s_dydz       = segmentInfo.segment_dydz      ->at(segIDX);
-        const double s_cov_x      = segmentInfo.segment_cov_x     ->at(segIDX);
-        const double s_cov_y      = segmentInfo.segment_cov_y     ->at(segIDX);
-        const double s_cov_dxdz   = segmentInfo.segment_cov_dxdz  ->at(segIDX);
-        const double s_cov_dydz   = segmentInfo.segment_cov_dydz  ->at(segIDX);
-        const double s_cov_dxdz_x = segmentInfo.segment_cov_dxdz_x->at(segIDX);
-        const double s_cov_dydz_y = segmentInfo.segment_cov_dydz_y->at(segIDX);
-
-        projx = s_x + projZ*s_dxdz;
-        projy = s_y + projZ*s_dydz;
-        projxe = TMath::Sqrt( s_cov_x + projZ*projZ*s_cov_dxdz + 2*projZ*s_cov_dxdz_x);
-        projye = TMath::Sqrt( s_cov_y + projZ*projZ*s_cov_dydz + 2*projZ*s_cov_dydz_y);
+        gem(gemFile,"GEMtree", gemInfo),
+        cscSegments(&csc.segments),
+        gemGeo(&gem.gemInfo.geo),
+        gemClusters(&gem.gemInfo.clusters)
+    {
     }
 
     void AnalyzeBoth::analyze(int reportFrequency) {
@@ -67,5 +62,37 @@ namespace CSCGEMTuples {
         }
     }
 
-}
 
+
+
+    AnalyzeTMB::AnalyzeTMB(std::string fileName, std::string treeName)
+        : BaseTupleAnalyzer(fileName,treeName) {
+
+       gem_chamber   = new std::vector<int> ;
+       gem_partition = new std::vector<int> ;
+       gem_BX        = new std::vector<int> ;
+       gem_strip     = new std::vector<int> ;
+       gem_nStrips   = new std::vector<int> ;
+       lct_chamber   = new std::vector<int> ;
+       lct_BX        = new std::vector<int> ;
+       lct_strip     = new std::vector<int> ;
+       lct_wg        = new std::vector<int> ;
+       lct_valid     = new std::vector<int> ;
+      setBranchAddress("gem_chamber"   ,&gem_chamber  , true);
+      setBranchAddress("gem_partition" ,&gem_partition, true);
+      setBranchAddress("gem_BX"        ,&gem_BX       , true);
+      setBranchAddress("gem_strip"     ,&gem_strip    , true);
+      setBranchAddress("gem_nStrips"   ,&gem_nStrips  , true);
+      setBranchAddress("lct_chamber"   ,&lct_chamber  , true);
+      setBranchAddress("lct_BX"        ,&lct_BX       , true);
+      setBranchAddress("lct_strip"     ,&lct_strip    , true);
+      setBranchAddress("lct_wg"        ,&lct_wg       , true);
+      setBranchAddress("lct_valid"     ,&lct_valid    , true);
+
+        }
+    void AnalyzeTMB::runAEvent() {
+    }
+
+
+
+}

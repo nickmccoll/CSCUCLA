@@ -78,19 +78,21 @@ public:
   }
 
   virtual void runAEvent() {
-      plotter.get1D("nSegments")->Fill(segmentInfo.segment_id->size());
+    buildSegments();
+      plotter.get1D("nSegments")->Fill(segments.size());
 
-      if(segmentInfo.segment_id->size() != 1) return;
+      if(segments.size() != 1) return;
       plotter.get1D("nRecHitsInSeg")->Fill(segmentInfo.segment_nHits->at(0));
       plotter.get1D("nEXRecHits")->Fill(recHitInfo.rh_id->size() - segmentInfo.segment_nHits->at(0));
       plotter.get1D("chi2")->Fill(segmentInfo.segment_chisq->at(0));
 
       const double projZ = 34.3123;
-      double projx,projy,projx_error,projy_error;
-      projSement(0,projZ,projx,projy,projx_error,projy_error);
-      projx -= segmentInfo.segment_pos_x->at(0);
-      projy -= segmentInfo.segment_pos_y->at(0);
-
+      auto proj = segments[0].project(0,0,projZ,0);
+//      projSement(0,projZ,projx,projy,projx_error,projy_error);
+      double projx = proj.x() - segmentInfo.segment_pos_x->at(0);
+      double projy = proj.y() - segmentInfo.segment_pos_y->at(0);
+      double projx_error = proj.error_x();
+      double projy_error = proj.error_y();
       plotter.get1D("projError_x")->Fill(projx_error);
       plotter.get1D("projError_y")->Fill(projy_error);
 
@@ -123,8 +125,14 @@ public:
       else{
         plotter.get1D("nrh_eq6_nExH_leq1_chi2Prob_geq0p01_projError_x")->Fill(projx_error);
         plotter.get1D("nrh_eq6_nExH_leq1_chi2Prob_geq0p01_projError_y")->Fill(projy_error);
-        double projx2,projy2,projx_error2,projy_error2;
-        projSement(0,0,projx2,projy2,projx_error2,projy_error2);
+
+        auto proj2 = segments[0].project(0,0,0,0);
+        double projx2 = proj2.x();
+        double projy2 = proj2.y();
+        double projx_error2 = proj2.error_x();
+        double projy_error2 = proj2.error_y();
+
+
         plotter.get1D("nrh_eq6_nExH_leq1_chi2Prob_geq0p01_projError_x_0")->Fill(projx_error2);
         plotter.get1D("nrh_eq6_nExH_leq1_chi2Prob_geq0p01_projError_y_0")->Fill(projy_error2);
         plotter.get2D("nrh_eq6_nExH_leq1_chi2Prob_geq0p01_SegmentMap")->Fill(segmentInfo.segment_pos_x->at(0),segmentInfo.segment_pos_y->at(0));

@@ -12,7 +12,7 @@ ifeq ($(PLATFORM),macosx)
 CXXFLAGS += -std=c++11
 endif
 
-OBJS = $(LIBDIR)/BaseTupleAnalyzer.o $(LIBDIR)/GEMGeoInfo.o $(LIBDIR)/GEMInfo.o $(LIBDIR)/BaseTupleAnalyzer.o  $(LIBDIR)/BaseCSCAndGEMAnalyzer.o \
+OBJS = $(LIBDIR)/BaseTupleAnalyzer.o $(LIBDIR)/GEMChannelMapping.o $(LIBDIR)/GEMInfo.o $(LIBDIR)/BaseTupleAnalyzer.o  $(LIBDIR)/BaseCSCAndGEMAnalyzer.o \
 	$(LIBDIR)/GEMPartitionGeometry.o $(LIBDIR)/Points.o $(LIBDIR)/GEMGeometry.o $(LIBDIR)/GEMGeoPlotting.o $(LIBDIR)/Segment.o CSCTupleAnalysisDict.o
 INTS = $(INTDIR)/GEMGeoPlotting.h 
 

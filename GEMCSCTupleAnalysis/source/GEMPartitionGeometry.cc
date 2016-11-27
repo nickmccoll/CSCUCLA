@@ -45,7 +45,7 @@ float GEMPartitionGeometry::localStripLength(const Point2D& lp) const {
 float    GEMPartitionGeometry::localPitch(const Point2D& lp) const {
   float x=lp.x();
   float y=theYAxOr*lp.y()+theDistToBeam;
-  return thePitch*y/(theDistToBeam*std::sqrt(1.f+x*x/(y*y))); //I think this should be 1/sqrt(...), but I took it from CMSSW...just be carefull
+  return thePitch*y/(theDistToBeam*std::sqrt(1.f+x*x/(y*y)));
 }
 
 Error2D GEMPartitionGeometry::localError(float strip, float stripErr2)const {

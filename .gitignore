@@ -1,3 +1,8 @@
+.autotools
+.cproject
+.project
+.settings
+
 *.pyc
 *.pcm
 *.d
